@@ -10,21 +10,19 @@ class TrustedDevice extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
+        'user_id',
         'device_name',
         'device_fingerprint',
-        'ip_address',
         'is_active',
+        'last_used_at',
     ];
 
-    /**
-     * Get the user that owns the trusted device.
-     */
+    protected $casts = [
+        'is_active' => 'boolean',
+        'last_used_at' => 'datetime',
+    ];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

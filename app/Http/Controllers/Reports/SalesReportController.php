@@ -10,6 +10,11 @@ use Illuminate\Http\Request;
 
 class SalesReportController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:reports.view.sales');
+    }
+
     public function dailyJson(Request $request)
     {
         $date = $request->query('date', Carbon::today()->toDateString());

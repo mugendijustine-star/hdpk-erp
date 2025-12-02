@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\DB;
 
 class StockAuditController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:stock.adjust')->only('approve');
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -21,9 +26,10 @@ class StockAuditController extends Controller
             'lines.*.expected_qty' => ['required', 'numeric'],
             'lines.*.counted_qty' => ['required', 'numeric'],
             'lines.*.difference_qty' => ['required', 'numeric'],
-            'lines.*.loss_type' => ['nullable', 'string'],
-            'lines.*.responsible_user_id' => ['nullable', 'integer'],
+            'lines.*.loss_type' => ['nullable', 'string', 'in:loss,damage,expiry'],
+            'lines.*.responsible_user_id' => ['nullable', 'integer', 'exists:users,id'],
             'lines.*.manager_comment' => ['nullable', 'string'],
+            'lines.*.admin_comment' => ['nullable', 'string'],
         ]);
 
         return DB::transaction(function () use ($validated) {
@@ -38,6 +44,7 @@ class StockAuditController extends Controller
                     'loss_type' => $line['loss_type'] ?? null,
                     'responsible_user_id' => $line['responsible_user_id'] ?? null,
                     'manager_comment' => $line['manager_comment'] ?? null,
+                    'admin_comment' => $line['admin_comment'] ?? null,
                 ]);
             });
 
@@ -54,8 +61,8 @@ class StockAuditController extends Controller
             'lines' => ['required', 'array'],
             'lines.*.id' => ['required', 'integer'],
             'lines.*.admin_comment' => ['nullable', 'string'],
-            'lines.*.loss_type' => ['nullable', 'string'],
-            'lines.*.responsible_user_id' => ['nullable', 'integer'],
+            'lines.*.loss_type' => ['nullable', 'string', 'in:loss,damage,expiry'],
+            'lines.*.responsible_user_id' => ['nullable', 'integer', 'exists:users,id'],
             'lines.*.manager_comment' => ['nullable', 'string'],
         ]);
 

@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\DB;
 
 class BalanceSheetController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:reports.view.accounting');
+    }
+
     /**
      * Return balance sheet data as JSON.
      */

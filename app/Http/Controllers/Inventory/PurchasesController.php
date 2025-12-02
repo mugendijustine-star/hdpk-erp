@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\DB;
 
 class PurchasesController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:purchases.create')->only('store');
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([
