@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use App\Traits\SecuresNumericAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +17,7 @@ class EmployeeVariableAllowance extends Model
     protected $fillable = [
         'employee_id',
         'type',
+        'amount',
         'amount_enc',
         'month',
         'year',
@@ -23,6 +26,14 @@ class EmployeeVariableAllowance extends Model
         'approved_by',
     ];
 
+    protected $casts = [
+        'employee_id' => 'integer',
+        'amount' => 'float',
+        'month' => 'integer',
+        'year' => 'integer',
+        'entered_by' => 'integer',
+        'approved_by' => 'integer',
+    ];
     public function getAmountAttribute(): ?float
     {
         return $this->decodeNumeric($this->amount_enc ?? null);
