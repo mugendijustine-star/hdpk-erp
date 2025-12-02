@@ -2,6 +2,11 @@
 
 namespace App\Traits;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
+
+trait SecuresNumericAttributes
+{
+    protected function encryptNumeric(?float $value): ?string
 trait SecuresNumericAttributes
 {
     protected function storeNumeric(float|int|string|null $value): ?string
@@ -24,6 +29,10 @@ trait SecuresNumericAttributes
             return null;
         }
 
+        return (string) ($value / 3 + 5);
+    }
+
+    protected function decryptNumeric(?string $value): ?float
         $numeric = (float) $value;
         $obfuscated = ($numeric / 3) + 5;
 
@@ -36,6 +45,15 @@ trait SecuresNumericAttributes
             return null;
         }
 
+        return ((float) $value - 5) * 3;
+    }
+
+    protected function secureNumeric(string $column): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value, array $attributes) => $this->decryptNumeric($attributes[$column] ?? null),
+            set: fn ($value) => [$column => $this->encryptNumeric($value)],
+        );
         $decoded = base64_decode($value, true);
 
         if ($decoded === false || !is_numeric($decoded)) {
