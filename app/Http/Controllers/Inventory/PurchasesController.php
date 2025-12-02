@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Inventory\Purchase;
 use App\Models\Inventory\PurchaseLine;
 use App\Models\Inventory\StockMovement;
+use App\Services\AccountingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -65,19 +66,10 @@ class PurchasesController extends Controller
                 ]);
             }
 
-            // TODO: Post accounting journal entries.
-            // If payment_method = 'capital':
-            //   Dr Inventory (total)
-            //   Cr Capital – Owner’s Equity (total)
-            // Else if payment_method is a bank or cash method:
-            //   Dr Inventory
-            //   Cr respective Cash/Bank account
-            // Else if payment_method is creditor_goods or creditor_services:
-            //   Dr Inventory
-            //   Cr respective Creditors account
-
             return [$purchase, $lines];
         });
+
+        AccountingService::postPurchase($purchase);
 
         return response()->json([
             'message' => 'Purchase recorded successfully.',

@@ -8,6 +8,7 @@ use App\Models\EmployeeFixedAllowance;
 use App\Models\EmployeeVariableAllowance;
 use App\Models\PayrollDetail;
 use App\Models\PayrollRun;
+use App\Services\AccountingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -92,6 +93,8 @@ class PayrollRunController extends Controller
             'status' => 'approved',
             'approved_by' => auth()->id(),
         ]);
+
+        AccountingService::postPayroll($run);
 
         return response()->json($run);
     }

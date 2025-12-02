@@ -4,7 +4,15 @@ namespace App\Http\Controllers\Pos;
 
 use App\Http\Controllers\Controller;
 use App\Models\Sale;
+use App\Models\SaleLine;
+use App\Models\SalePayment;
+use App\Models\StockMovement;
+use App\Services\AccountingService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class SaleController extends Controller
 {
@@ -20,16 +28,8 @@ class SaleController extends Controller
         ]);
 
         return $pdf->download('delivery-note-' . $sale->id . '.pdf');
-use App\Models\SaleLine;
-use App\Models\SalePayment;
-use App\Models\StockMovement;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
+    }
 
-class SaleController extends Controller
-{
     public function store(Request $request): JsonResponse
     {
         $data = $request->validate([
@@ -101,12 +101,10 @@ class SaleController extends Controller
                 $sale->payments[] = $salePayment;
             }
 
-            // Dr Debtors / Cash / Bank (per payment method)
-            // Cr Sales
-            // Dr Cost of Sales, Cr Inventory (when COGS is implemented)
-
             return $sale->load(['lines', 'payments']);
         });
+
+        AccountingService::postSale($sale);
 
         return response()->json($sale);
     }
