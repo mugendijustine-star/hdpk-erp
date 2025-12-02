@@ -9,6 +9,7 @@ use App\Models\ProductVariant;
 use App\Models\ProductionBatch;
 use App\Models\ProductionOutput;
 use App\Models\StockMovement;
+use App\Services\AccountingService;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
 
@@ -112,12 +113,10 @@ class ProductionController extends Controller
             }
         }
 
-        // Placeholder: update production_in StockMovement unit_cost values if needed.
+        $batch->total_raw_material_cost = $totalRawMaterialCost;
+        $batch->manufacturing_overheads = $totalManufacturingOverheads;
 
-        // Accounting placeholder:
-        // Dr Finished Goods Inventory (total_cost)
-        // Cr Raw Materials Inventory
-        // Cr Manufacturing Expense / WIP accounts as needed.
+        AccountingService::postProduction($batch, $totalCost);
 
         return [
             'batch' => $batch->toArray(),
