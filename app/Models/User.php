@@ -22,6 +22,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'role',
         'password',
     ];
 
@@ -44,6 +45,26 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isManager(): bool
+    {
+        return $this->role === 'manager';
+    }
+
+    public function isClerk(): bool
+    {
+        return $this->role === 'clerk';
+    }
+
+    public function isSalesRep(): bool
+    {
+        return $this->role === 'sales_rep';
+    }
 
     /**
      * Get the trusted devices registered for the user.

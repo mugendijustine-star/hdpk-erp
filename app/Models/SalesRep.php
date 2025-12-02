@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+/**
+ * A true field sales user should have a matching users.role of 'sales_rep'
+ * and a corresponding sales_reps row linked via user_id.
+ */
 class SalesRep extends Model
 {
     use HasFactory;
