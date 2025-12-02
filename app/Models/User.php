@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
@@ -72,5 +73,10 @@ class User extends Authenticatable
     public function trustedDevices(): HasMany
     {
         return $this->hasMany(TrustedDevice::class);
+    }
+
+    public function salesRep(): HasOne
+    {
+        return $this->hasOne(SalesRep::class, 'user_id');
     }
 }

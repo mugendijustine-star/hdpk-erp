@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Common\UserLookupController;
 use App\Http\Controllers\Auth\TrustedDeviceController;
 use App\Http\Controllers\Accounting\CashAuditController;
 use App\Http\Controllers\Field\FieldLeadController;
@@ -25,6 +27,13 @@ use App\Http\Controllers\Reports\TrialBalanceController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum', 'trusted.device'])->group(function () {
+    Route::middleware(['role:admin'])->prefix('admin')->group(function () {
+        Route::get('/users', [UserManagementController::class, 'index']);
+        Route::post('/users', [UserManagementController::class, 'store']);
+        Route::put('/users/{user}', [UserManagementController::class, 'update']);
+        Route::post('/users/{user}/sales-rep', [UserManagementController::class, 'linkSalesRep']);
+    });
+
     Route::get('/reports/capital', [CapitalMovementReportController::class, 'capitalJson']);
     Route::get('/reports/capital/pdf', [CapitalMovementReportController::class, 'capitalPdf']);
 
@@ -101,6 +110,8 @@ Route::middleware(['auth:sanctum', 'trusted.device'])->group(function () {
     Route::post('/production-batches', [ProductionController::class, 'store']);
 
     Route::get('/sales/{sale}/delivery-note', [SaleController::class, 'printDeliveryNote']);
+
+    Route::get('/users', [UserLookupController::class, 'index']);
 });
 
 Route::middleware(['auth:sanctum', 'trusted.device', 'permission:system.manage.devices'])->group(function () {
