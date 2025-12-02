@@ -12,6 +12,11 @@ use Illuminate\Http\Request;
 
 class CashbookReportController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:reports.view.accounting');
+    }
+
     /**
      * Return cashbook data as JSON.
      */

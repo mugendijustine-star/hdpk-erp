@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\DB;
 
 class StockAuditController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:stock.adjust')->only('approve');
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([

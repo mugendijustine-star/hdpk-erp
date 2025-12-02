@@ -11,6 +11,11 @@ use Illuminate\Support\Carbon;
 
 class CapitalMovementReportController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:reports.view.accounting');
+    }
+
     public function capitalJson(Request $request)
     {
         $data = $this->prepareReportData($request);

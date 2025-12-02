@@ -16,6 +16,12 @@ use Illuminate\Validation\Rule;
 
 class SaleController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:pos.create')->only('store');
+        $this->middleware('permission:pos.approve')->only('printDeliveryNote');
+    }
+
     /**
      * Download a delivery note PDF for the given sale.
      */
