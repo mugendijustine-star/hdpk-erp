@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\StockAudit;
 use App\Models\StockAuditLine;
 use App\Models\StockMovement;
+use App\Services\AuditLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -41,6 +42,18 @@ class StockAuditController extends Controller
                 ]);
             });
 
+            AuditLogger::log(
+                'Inventory',
+                'create',
+                'StockAudit',
+                $audit->id,
+                null,
+                [
+                    'audit_id' => $audit->id,
+                    'line_ids' => $lines->pluck('id')->all(),
+                ]
+            );
+
             return response()->json([
                 'audit' => $audit->fresh('lines'),
                 'lines' => $lines,
@@ -60,6 +73,10 @@ class StockAuditController extends Controller
         ]);
 
         return DB::transaction(function () use ($validated, $audit) {
+            $oldValues = [
+                'status' => $audit->status,
+            ];
+
             foreach ($validated['lines'] as $lineInput) {
                 /** @var StockAuditLine $line */
                 $line = $audit->lines()->findOrFail($lineInput['id']);
@@ -93,6 +110,19 @@ class StockAuditController extends Controller
             $audit->approved_by = Auth::id();
             $audit->approved_at = now();
             $audit->save();
+
+            AuditLogger::log(
+                'Inventory',
+                'approve',
+                'StockAudit',
+                $audit->id,
+                $oldValues,
+                [
+                    'status' => $audit->status,
+                    'approved_by' => $audit->approved_by,
+                    'approved_at' => $audit->approved_at,
+                ]
+            );
 
             return response()->json($audit->fresh('lines'));
         });
