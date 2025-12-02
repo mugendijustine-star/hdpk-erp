@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\DB;
 
 class TrialBalanceController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:reports.view.accounting');
+    }
+
     /**
      * Return trial balance data as JSON.
      */

@@ -14,6 +14,13 @@ use Illuminate\Support\Facades\DB;
 
 class PayrollRunController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:hr.payroll.run')->only('run');
+        $this->middleware('permission:hr.view')->only('show');
+        $this->middleware('permission:hr.payroll.approve')->only('approve');
+    }
+
     /**
      * Generate payroll for the specified month and year.
      */
