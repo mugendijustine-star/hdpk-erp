@@ -24,7 +24,10 @@ use App\Http\Controllers\Reports\StockLossReportController;
 use App\Http\Controllers\Reports\FieldSalesReportController;
 use App\Http\Controllers\Reports\SalesReportController;
 use App\Http\Controllers\Reports\TrialBalanceController;
+use App\Http\Controllers\System\SystemHealthController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/health', [SystemHealthController::class, 'index']);
 
 Route::middleware(['auth:sanctum', 'trusted.device'])->group(function () {
     Route::middleware(['role:admin'])->prefix('admin')->group(function () {
