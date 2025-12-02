@@ -27,6 +27,11 @@ if (!function_exists('auth')) {
 
 class ProductionController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:manufacturing.record')->only('store');
+    }
+
     public function store(Request $request)
     {
         $data = $request->all();
