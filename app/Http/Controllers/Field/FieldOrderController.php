@@ -13,6 +13,7 @@ use App\Models\SalesRep;
 use App\Models\StockMovement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class FieldOrderController extends Controller
 {
@@ -71,33 +72,37 @@ class FieldOrderController extends Controller
             }
         }
 
-        $order = FieldOrder::create([
-            'status' => 'submitted',
-            'sales_rep_id' => $validated['sales_rep_id'],
-            'customer_id' => $validated['customer_id'],
-            'sales_territory_id' => $validated['sales_territory_id'] ?? null,
-            'requested_date' => $validated['requested_date'] ?? null,
-            'notes' => $validated['notes'] ?? null,
-        ]);
-
-        $orderTotal = 0;
-
-        foreach ($validated['items'] as $item) {
-            $lineTotal = $item['qty'] * $item['unit_price'];
-            $orderTotal += $lineTotal;
-
-            $line = new FieldOrderLine([
-                'field_order_id' => $order->id,
-                'product_variant_id' => $item['product_variant_id'],
+        [$order, $orderTotal] = DB::transaction(function () use ($validated) {
+            $order = FieldOrder::create([
+                'status' => 'submitted',
+                'sales_rep_id' => $validated['sales_rep_id'],
+                'customer_id' => $validated['customer_id'],
+                'sales_territory_id' => $validated['sales_territory_id'] ?? null,
+                'requested_date' => $validated['requested_date'] ?? null,
+                'notes' => $validated['notes'] ?? null,
             ]);
 
-            $line->qty = $item['qty'];
-            $line->unit_price = $item['unit_price'];
-            $line->line_total = $lineTotal;
-            $line->save();
-        }
+            $orderTotal = 0;
 
-        $order->load('lines');
+            foreach ($validated['items'] as $item) {
+                $lineTotal = $item['qty'] * $item['unit_price'];
+                $orderTotal += $lineTotal;
+
+                $line = new FieldOrderLine([
+                    'field_order_id' => $order->id,
+                    'product_variant_id' => $item['product_variant_id'],
+                ]);
+
+                $line->qty = $item['qty'];
+                $line->unit_price = $item['unit_price'];
+                $line->line_total = $lineTotal;
+                $line->save();
+            }
+
+            $order->load('lines');
+
+            return [$order, $orderTotal];
+        });
 
         return response()->json([
             'order' => $order,
@@ -151,58 +156,63 @@ class FieldOrderController extends Controller
         $order->load('lines');
 
         $branchId = $request->input('branch_id');
-        $saleTotal = $order->lines->sum(function (FieldOrderLine $line) {
-            return $line->line_total ?? ($line->qty * $line->unit_price);
-        });
 
-        $sale = Sale::create([
-            'branch_id' => $branchId,
-            'customer_id' => $order->customer_id,
-            'date_time' => Carbon::now()->toDateTimeString(),
-            'user_id' => $user->id,
-            'status' => 'completed',
-        ]);
+        [$sale, $saleTotal] = DB::transaction(function () use ($order, $branchId, $user) {
+            $saleTotal = $order->lines->sum(function (FieldOrderLine $line) {
+                return $line->line_total ?? ($line->qty * $line->unit_price);
+            });
 
-        $sale->total = $saleTotal;
-        $sale->save();
-
-        foreach ($order->lines as $line) {
-            $saleLine = new SaleLine([
-                'sale_id' => $sale->id,
-                'product_variant_id' => $line->product_variant_id,
-            ]);
-
-            $saleLine->qty = $line->qty;
-            $saleLine->unit_price = $line->unit_price;
-            $saleLine->line_total = $line->line_total ?? ($line->qty * $line->unit_price);
-            $saleLine->save();
-
-            $variant = ProductVariant::find($line->product_variant_id);
-
-            $stockMovement = new StockMovement([
-                'product_variant_id' => $line->product_variant_id,
+            $sale = Sale::create([
                 'branch_id' => $branchId,
-                'type' => 'sale',
-                'reference' => 'FIELD-ORDER-' . $order->id,
+                'customer_id' => $order->customer_id,
+                'date_time' => Carbon::now()->toDateTimeString(),
                 'user_id' => $user->id,
+                'status' => 'completed',
             ]);
 
-            $stockMovement->qty_change = -1 * ($line->qty ?? 0);
-            $stockMovement->unit_cost = $variant?->cost;
-            $stockMovement->save();
-        }
+            $sale->total = $saleTotal;
+            $sale->save();
 
-        SalePayment::create([
-            'sale_id' => $sale->id,
-            'method' => 'credit',
-            'amount' => $saleTotal,
-        ]);
+            foreach ($order->lines as $line) {
+                $saleLine = new SaleLine([
+                    'sale_id' => $sale->id,
+                    'product_variant_id' => $line->product_variant_id,
+                ]);
 
-        $order->sale_id = $sale->id;
-        $order->status = 'dispatched';
-        $order->dispatched_by = $user->id;
-        $order->dispatched_at = now();
-        $order->save();
+                $saleLine->qty = $line->qty;
+                $saleLine->unit_price = $line->unit_price;
+                $saleLine->line_total = $line->line_total ?? ($line->qty * $line->unit_price);
+                $saleLine->save();
+
+                $variant = ProductVariant::find($line->product_variant_id);
+
+                $stockMovement = new StockMovement([
+                    'product_variant_id' => $line->product_variant_id,
+                    'branch_id' => $branchId,
+                    'type' => 'sale',
+                    'reference' => 'FIELD-ORDER-' . $order->id,
+                    'user_id' => $user->id,
+                ]);
+
+                $stockMovement->qty_change = -1 * ($line->qty ?? 0);
+                $stockMovement->unit_cost = $variant?->cost;
+                $stockMovement->save();
+            }
+
+            SalePayment::create([
+                'sale_id' => $sale->id,
+                'method' => 'credit',
+                'amount' => $saleTotal,
+            ]);
+
+            $order->sale_id = $sale->id;
+            $order->status = 'dispatched';
+            $order->dispatched_by = $user->id;
+            $order->dispatched_at = now();
+            $order->save();
+
+            return [$sale, $saleTotal];
+        });
 
         // AccountingService::postSale($sale);
 
