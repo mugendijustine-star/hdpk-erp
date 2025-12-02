@@ -8,6 +8,7 @@ use App\Http\Controllers\Manufacturing\ProductionController;
 use App\Http\Controllers\Pos\SaleController;
 use App\Http\Controllers\Reports\CapitalMovementReportController;
 use App\Http\Controllers\Reports\CashbookReportController;
+use App\Http\Controllers\Reports\BalanceSheetController;
 use App\Http\Controllers\Reports\SalesReportController;
 use App\Http\Controllers\Reports\TrialBalanceController;
 use Illuminate\Support\Facades\Route;
@@ -18,6 +19,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/reports/cashbook', [CashbookReportController::class, 'cashbookJson']);
     Route::get('/reports/cashbook/pdf', [CashbookReportController::class, 'cashbookPdf']);
+
+    Route::get('/reports/balance-sheet', [BalanceSheetController::class, 'indexJson']);
+    Route::get('/reports/balance-sheet/pdf', [BalanceSheetController::class, 'indexPdf']);
 
     Route::get('/reports/trial-balance', [TrialBalanceController::class, 'indexJson']);
     Route::get('/reports/trial-balance/pdf', [TrialBalanceController::class, 'indexPdf']);
