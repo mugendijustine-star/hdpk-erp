@@ -131,7 +131,13 @@ class FieldOrderController extends Controller
         $order->manager_id = $user->id;
         $order->approved_at = now();
         $order->assigned_clerk_id = $validated['assigned_clerk_id'] ?? null;
-        $order->notes = $validated['notes'] ?? $order->notes;
+
+        if (array_key_exists('notes', $validated) && $validated['notes'] !== null) {
+            $order->notes = $order->notes
+                ? trim($order->notes)."\n\n".$validated['notes']
+                : $validated['notes'];
+        }
+
         $order->save();
 
         return response()->json($order);
