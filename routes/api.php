@@ -19,6 +19,7 @@ use App\Http\Controllers\Reports\CashAuditReportController;
 use App\Http\Controllers\Reports\BalanceSheetController;
 use App\Http\Controllers\Reports\ProfitLossController;
 use App\Http\Controllers\Reports\StockLossReportController;
+use App\Http\Controllers\Reports\FieldSalesReportController;
 use App\Http\Controllers\Reports\SalesReportController;
 use App\Http\Controllers\Reports\TrialBalanceController;
 use Illuminate\Support\Facades\Route;
@@ -40,6 +41,11 @@ Route::middleware(['auth:sanctum', 'trusted.device'])->group(function () {
 
     Route::get('/reports/stock-loss', [StockLossReportController::class, 'indexJson']);
     Route::get('/reports/stock-loss/pdf', [StockLossReportController::class, 'indexPdf']);
+
+    Route::get('/reports/field-sales/rep', [FieldSalesReportController::class, 'repPerformanceJson']);
+    Route::get('/reports/field-sales/rep/pdf', [FieldSalesReportController::class, 'repPerformancePdf']);
+    Route::get('/reports/field-sales/territory', [FieldSalesReportController::class, 'territoryPerformanceJson']);
+    Route::get('/reports/field-sales/territory/pdf', [FieldSalesReportController::class, 'territoryPerformancePdf']);
 
     Route::get('/reports/trial-balance', [TrialBalanceController::class, 'indexJson']);
     Route::get('/reports/trial-balance/pdf', [TrialBalanceController::class, 'indexPdf']);
