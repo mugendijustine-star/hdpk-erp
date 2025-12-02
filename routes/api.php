@@ -4,6 +4,7 @@ use App\Http\Controllers\Hr\AttendanceController;
 use App\Http\Controllers\Hr\PayrollRunController;
 use App\Http\Controllers\Hr\VariableAllowanceController;
 use App\Http\Controllers\Inventory\PurchasesController;
+use App\Http\Controllers\Accounting\CashAuditController;
 use App\Http\Controllers\Manufacturing\ProductionController;
 use App\Http\Controllers\Pos\SaleController;
 use App\Http\Controllers\Reports\CapitalMovementReportController;
@@ -28,6 +29,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/reports/trial-balance', [TrialBalanceController::class, 'indexJson']);
     Route::get('/reports/trial-balance/pdf', [TrialBalanceController::class, 'indexPdf']);
+
+    Route::get('/accounting/cash-audits', [CashAuditController::class, 'index']);
+    Route::post('/accounting/cash-audits', [CashAuditController::class, 'store']);
+    Route::post('/accounting/cash-audits/{audit}/approve', [CashAuditController::class, 'approve']);
 
     Route::post('/hr/payroll/run', [PayrollRunController::class, 'run']);
     Route::get('/hr/payroll/{run}', [PayrollRunController::class, 'show']);
