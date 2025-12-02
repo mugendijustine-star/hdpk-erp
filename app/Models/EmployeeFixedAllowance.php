@@ -2,14 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use App\Traits\SecuresNumericAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class EmployeeVariableAllowance extends Model
+class EmployeeFixedAllowance extends Model
 {
     use HasFactory;
     use SecuresNumericAttributes;
@@ -17,23 +15,9 @@ class EmployeeVariableAllowance extends Model
     protected $fillable = [
         'employee_id',
         'type',
-        'amount',
         'amount_enc',
-        'month',
-        'year',
-        'status',
-        'entered_by',
-        'approved_by',
     ];
 
-    protected $casts = [
-        'employee_id' => 'integer',
-        'amount' => 'float',
-        'month' => 'integer',
-        'year' => 'integer',
-        'entered_by' => 'integer',
-        'approved_by' => 'integer',
-    ];
     public function getAmountAttribute(): ?float
     {
         return $this->decodeNumeric($this->amount_enc ?? null);
@@ -47,15 +31,5 @@ class EmployeeVariableAllowance extends Model
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
-    }
-
-    public function enteredBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'entered_by');
-    }
-
-    public function approvedBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'approved_by');
     }
 }
