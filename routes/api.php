@@ -1,11 +1,16 @@
 <?php
 
 use App\Http\Controllers\Auth\TrustedDeviceController;
+use App\Http\Controllers\Accounting\CashAuditController;
+use App\Http\Controllers\Field\FieldLeadController;
+use App\Http\Controllers\Field\FieldOrderController;
+use App\Http\Controllers\Field\FieldVisitController;
+use App\Http\Controllers\Field\SalesRepController;
+use App\Http\Controllers\Field\SalesTargetController;
 use App\Http\Controllers\Hr\AttendanceController;
 use App\Http\Controllers\Hr\PayrollRunController;
 use App\Http\Controllers\Hr\VariableAllowanceController;
 use App\Http\Controllers\Inventory\PurchasesController;
-use App\Http\Controllers\Accounting\CashAuditController;
 use App\Http\Controllers\Manufacturing\ProductionController;
 use App\Http\Controllers\Pos\SaleController;
 use App\Http\Controllers\Reports\CapitalMovementReportController;
@@ -42,6 +47,29 @@ Route::middleware(['auth:sanctum', 'trusted.device'])->group(function () {
     Route::get('/accounting/cash-audits', [CashAuditController::class, 'index']);
     Route::post('/accounting/cash-audits', [CashAuditController::class, 'store']);
     Route::post('/accounting/cash-audits/{audit}/approve', [CashAuditController::class, 'approve']);
+
+    Route::prefix('field')->group(function () {
+        Route::get('/sales-reps', [SalesRepController::class, 'index']);
+        Route::post('/sales-reps', [SalesRepController::class, 'store']);
+        Route::get('/sales-reps/{rep}', [SalesRepController::class, 'show']);
+        Route::post('/sales-reps/{rep}/territories', [SalesRepController::class, 'attachTerritories']);
+
+        Route::get('/visits', [FieldVisitController::class, 'index']);
+        Route::post('/visits', [FieldVisitController::class, 'store']);
+        Route::get('/visits/{visit}', [FieldVisitController::class, 'show']);
+
+        Route::get('/leads', [FieldLeadController::class, 'index']);
+        Route::post('/leads', [FieldLeadController::class, 'store']);
+        Route::post('/leads/{lead}/status', [FieldLeadController::class, 'updateStatus']);
+
+        Route::get('/targets', [SalesTargetController::class, 'index']);
+        Route::post('/targets', [SalesTargetController::class, 'store']);
+
+        Route::get('/orders', [FieldOrderController::class, 'index']);
+        Route::post('/orders', [FieldOrderController::class, 'store']);
+        Route::post('/orders/{order}/approve', [FieldOrderController::class, 'approve']);
+        Route::post('/orders/{order}/dispatch', [FieldOrderController::class, 'dispatch']);
+    });
 
     Route::post('/hr/payroll/run', [PayrollRunController::class, 'run']);
     Route::get('/hr/payroll/{run}', [PayrollRunController::class, 'show']);
