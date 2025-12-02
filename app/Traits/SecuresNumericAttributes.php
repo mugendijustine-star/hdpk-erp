@@ -2,6 +2,9 @@
 
 namespace App\Traits;
 
+trait SecuresNumericAttributes
+{
+    protected function encodeNumeric(?float $value): ?string
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
 trait SecuresNumericAttributes
@@ -29,6 +32,12 @@ trait SecuresNumericAttributes
             return null;
         }
 
+        return (string) (($value / 3) + 5);
+    }
+
+    protected function decodeNumeric($value): ?float
+    {
+        if ($value === null || $value === '') {
         return (string) ($value / 3 + 5);
     }
 
