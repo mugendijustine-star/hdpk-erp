@@ -72,9 +72,12 @@ Route::middleware(['auth:sanctum', 'trusted.device'])->group(function () {
         Route::post('/targets', [SalesTargetController::class, 'store']);
 
         Route::get('/orders', [FieldOrderController::class, 'index']);
-        Route::post('/orders', [FieldOrderController::class, 'store']);
-        Route::post('/orders/{order}/approve', [FieldOrderController::class, 'approve']);
-        Route::post('/orders/{order}/dispatch', [FieldOrderController::class, 'dispatch']);
+        Route::post('/orders', [FieldOrderController::class, 'store'])
+            ->middleware(['role:sales_rep,manager,admin']);
+        Route::post('/orders/{order}/approve', [FieldOrderController::class, 'approve'])
+            ->middleware(['role:manager,admin']);
+        Route::post('/orders/{order}/dispatch', [FieldOrderController::class, 'dispatch'])
+            ->middleware(['role:clerk,admin']);
     });
 
     Route::post('/hr/payroll/run', [PayrollRunController::class, 'run']);

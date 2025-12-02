@@ -9,6 +9,7 @@ use App\Models\ProductVariant;
 use App\Models\Sale;
 use App\Models\SaleLine;
 use App\Models\SalePayment;
+use App\Models\SalesRep;
 use App\Models\StockMovement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -44,6 +45,12 @@ class FieldOrderController extends Controller
 
     public function store(Request $request)
     {
+        $user = auth()->user();
+
+        if (! in_array($user->role, ['sales_rep', 'manager', 'admin'], true)) {
+            abort(403, 'Not allowed to create field orders');
+        }
+
         $validated = $request->validate([
             'sales_rep_id' => ['required', 'integer', 'exists:sales_reps,id'],
             'customer_id' => ['required', 'integer', 'exists:customers,id'],
@@ -55,6 +62,14 @@ class FieldOrderController extends Controller
             'items.*.qty' => ['required', 'numeric', 'gt:0'],
             'items.*.unit_price' => ['required', 'numeric', 'gte:0'],
         ]);
+
+        if ($user->role === 'sales_rep') {
+            $salesRep = SalesRep::where('user_id', $user->id)->first();
+
+            if (! $salesRep || (int) $validated['sales_rep_id'] !== $salesRep->id) {
+                abort(403, 'Not allowed to create field orders');
+            }
+        }
 
         $order = FieldOrder::create([
             'status' => 'submitted',
@@ -92,6 +107,12 @@ class FieldOrderController extends Controller
 
     public function approve(FieldOrder $order, Request $request)
     {
+        $user = auth()->user();
+
+        if (! in_array($user->role, ['manager', 'admin'], true)) {
+            abort(403, 'Not allowed to approve field orders');
+        }
+
         if ($order->status !== 'submitted') {
             return response()->json(['message' => 'Only submitted orders can be approved.'], 422);
         }
@@ -102,7 +123,7 @@ class FieldOrderController extends Controller
         ]);
 
         $order->status = 'approved';
-        $order->manager_id = auth()->id();
+        $order->manager_id = $user->id;
         $order->approved_at = now();
         $order->assigned_clerk_id = $validated['assigned_clerk_id'] ?? null;
         $order->notes = $validated['notes'] ?? $order->notes;
@@ -113,12 +134,18 @@ class FieldOrderController extends Controller
 
     public function dispatch(FieldOrder $order, Request $request)
     {
+        $user = auth()->user();
+
+        if (! in_array($user->role, ['clerk', 'admin'], true)) {
+            abort(403, 'Not allowed to dispatch field orders');
+        }
+
         if ($order->status !== 'approved') {
             return response()->json(['message' => 'Only approved orders can be dispatched.'], 422);
         }
 
-        if ($order->assigned_clerk_id && auth()->id() !== $order->assigned_clerk_id) {
-            return response()->json(['message' => 'You are not authorized to dispatch this order.'], 403);
+        if ($order->assigned_clerk_id && $user->role !== 'admin' && $user->id !== $order->assigned_clerk_id) {
+            return response()->json(['message' => 'Order not assigned to you.'], 403);
         }
 
         $order->load('lines');
@@ -132,7 +159,7 @@ class FieldOrderController extends Controller
             'branch_id' => $branchId,
             'customer_id' => $order->customer_id,
             'date_time' => Carbon::now()->toDateTimeString(),
-            'user_id' => auth()->id(),
+            'user_id' => $user->id,
             'status' => 'completed',
         ]);
 
@@ -157,7 +184,7 @@ class FieldOrderController extends Controller
                 'branch_id' => $branchId,
                 'type' => 'sale',
                 'reference' => 'FIELD-ORDER-' . $order->id,
-                'user_id' => auth()->id(),
+                'user_id' => $user->id,
             ]);
 
             $stockMovement->qty_change = -1 * ($line->qty ?? 0);
@@ -173,7 +200,7 @@ class FieldOrderController extends Controller
 
         $order->sale_id = $sale->id;
         $order->status = 'dispatched';
-        $order->dispatched_by = auth()->id();
+        $order->dispatched_by = $user->id;
         $order->dispatched_at = now();
         $order->save();
 
