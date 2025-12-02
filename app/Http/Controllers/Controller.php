@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+class Controller
+{
+    // Base controller stub for application controllers.
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
