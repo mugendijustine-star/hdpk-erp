@@ -11,5 +11,11 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ProductDemoSeeder::class,
         ]);
+    /**
+     * Seed the application's database.
+     */
+    public function run(): void
+    {
+        //
     }
 }
