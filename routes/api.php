@@ -10,6 +10,7 @@ use App\Http\Controllers\Manufacturing\ProductionController;
 use App\Http\Controllers\Pos\SaleController;
 use App\Http\Controllers\Reports\CapitalMovementReportController;
 use App\Http\Controllers\Reports\CashbookReportController;
+use App\Http\Controllers\Reports\CashAuditReportController;
 use App\Http\Controllers\Reports\BalanceSheetController;
 use App\Http\Controllers\Reports\ProfitLossController;
 use App\Http\Controllers\Reports\StockLossReportController;
@@ -23,6 +24,9 @@ Route::middleware(['auth:sanctum', 'trusted.device'])->group(function () {
 
     Route::get('/reports/cashbook', [CashbookReportController::class, 'cashbookJson']);
     Route::get('/reports/cashbook/pdf', [CashbookReportController::class, 'cashbookPdf']);
+
+    Route::get('/reports/cash-audit', [CashAuditReportController::class, 'indexJson']);
+    Route::get('/reports/cash-audit/pdf', [CashAuditReportController::class, 'indexPdf']);
 
     Route::get('/reports/balance-sheet', [BalanceSheetController::class, 'indexJson']);
     Route::get('/reports/balance-sheet/pdf', [BalanceSheetController::class, 'indexPdf']);

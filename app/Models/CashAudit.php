@@ -11,6 +11,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class CashAudit extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'date',
+        'branch_id',
     use SecuresNumericAttributes;
 
     protected $fillable = [
@@ -28,6 +32,11 @@ class CashAudit extends Model
 
     protected $casts = [
         'date' => 'date',
+        'expected_cash' => 'float',
+        'counted_cash' => 'float',
+        'difference' => 'float',
+    ];
+
     ];
 
     protected function expectedCash(): Attribute
