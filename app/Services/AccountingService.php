@@ -87,6 +87,7 @@ class AccountingService
             'bank_nat' => '1100',
             'bank_equity' => '1110',
             'bank_coop' => '1120',
+            'credit' => '2000',
             'creditor_services' => '2010',
             default => '2000',
         };

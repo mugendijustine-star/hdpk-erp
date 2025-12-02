@@ -24,7 +24,7 @@ class PurchasesController extends Controller
             'branch_id' => ['nullable', 'integer'],
             'date' => ['required', 'date'],
             'reference' => ['nullable', 'string'],
-            'payment_method' => ['required', 'string', 'in:cash,till,bank_nat,bank_equity,bank_coop,creditor_goods,creditor_services,capital'],
+            'payment_method' => ['required', 'string', 'in:cash,till,bank_nat,bank_equity,bank_coop,credit,creditor_goods,creditor_services,capital'],
             'items' => ['required', 'array'],
             'items.*.product_variant_id' => ['required', 'integer'],
             'items.*.qty' => ['required', 'numeric'],
