@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+class StockMovement extends BaseModel
+{
 class StockMovement
 {
     public int $id;

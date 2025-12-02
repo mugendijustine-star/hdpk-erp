@@ -2,6 +2,11 @@
 
 namespace App\Models;
 
+class ProductVariant extends BaseModel
+{
+    public function setCost(float $value): void
+    {
+        $this->attributes['cost'] = $value;
 use App\Traits\SecuresNumericAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

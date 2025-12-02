@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\Manufacturing\ProductionController;
+use Illuminate\Support\Facades\Route;
+
+Route::post('/production-batches', [ProductionController::class, 'store']);
 use App\Http\Controllers\Pos\SaleController;
 use Illuminate\Support\Facades\Route;
 

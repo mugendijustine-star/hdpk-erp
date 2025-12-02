@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+class ApcuRecord extends BaseModel
+{
 use App\Traits\SecuresNumericAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
