@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\TrustedDeviceController;
 use App\Http\Controllers\Hr\AttendanceController;
 use App\Http\Controllers\Hr\PayrollRunController;
 use App\Http\Controllers\Hr\VariableAllowanceController;
@@ -14,7 +15,7 @@ use App\Http\Controllers\Reports\SalesReportController;
 use App\Http\Controllers\Reports\TrialBalanceController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'trusted.device'])->group(function () {
     Route::get('/reports/capital', [CapitalMovementReportController::class, 'capitalJson']);
     Route::get('/reports/capital/pdf', [CapitalMovementReportController::class, 'capitalPdf']);
 
@@ -40,16 +41,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/hr/allowances/variable', [VariableAllowanceController::class, 'store']);
     Route::post('/hr/allowances/variable/{allowance}/approve', [VariableAllowanceController::class, 'approve']);
 
-    Route::get('/sales/{sale}/delivery-note', [SaleController::class, 'printDeliveryNote']);
-});
-
-Route::middleware(['auth:sanctum', 'trusted.device'])->group(function () {
     Route::get('/reports/sales/daily', [SalesReportController::class, 'dailyJson']);
     Route::get('/reports/sales/daily/pdf', [SalesReportController::class, 'dailyPdf']);
 
     Route::post('/sales', [SaleController::class, 'store']);
 
     Route::post('/purchases', [PurchasesController::class, 'store']);
+
+    Route::post('/production-batches', [ProductionController::class, 'store']);
+
+    Route::get('/sales/{sale}/delivery-note', [SaleController::class, 'printDeliveryNote']);
 });
 
-Route::post('/production-batches', [ProductionController::class, 'store']);
+Route::middleware(['auth:sanctum', 'trusted.device', 'permission:system.manage.devices'])->group(function () {
+    Route::get('/users/{user}/trusted-devices', [TrustedDeviceController::class, 'index']);
+    Route::post('/trusted-devices', [TrustedDeviceController::class, 'store']);
+    Route::post('/trusted-devices/{device}/deactivate', [TrustedDeviceController::class, 'deactivate']);
+});

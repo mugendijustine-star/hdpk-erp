@@ -16,8 +16,8 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('device_name')->nullable();
             $table->string('device_fingerprint');
-            $table->string('ip_address')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->timestamp('last_used_at')->nullable();
             $table->timestamps();
 
             $table->unique(['user_id', 'device_fingerprint']);
