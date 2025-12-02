@@ -11,6 +11,7 @@ use App\Http\Controllers\Reports\CapitalMovementReportController;
 use App\Http\Controllers\Reports\CashbookReportController;
 use App\Http\Controllers\Reports\BalanceSheetController;
 use App\Http\Controllers\Reports\ProfitLossController;
+use App\Http\Controllers\Reports\StockLossReportController;
 use App\Http\Controllers\Reports\SalesReportController;
 use App\Http\Controllers\Reports\TrialBalanceController;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +27,9 @@ Route::middleware(['auth:sanctum', 'trusted.device'])->group(function () {
     Route::get('/reports/balance-sheet/pdf', [BalanceSheetController::class, 'indexPdf']);
     Route::get('/reports/profit-loss', [ProfitLossController::class, 'indexJson']);
     Route::get('/reports/profit-loss/pdf', [ProfitLossController::class, 'indexPdf']);
+
+    Route::get('/reports/stock-loss', [StockLossReportController::class, 'indexJson']);
+    Route::get('/reports/stock-loss/pdf', [StockLossReportController::class, 'indexPdf']);
 
     Route::get('/reports/trial-balance', [TrialBalanceController::class, 'indexJson']);
     Route::get('/reports/trial-balance/pdf', [TrialBalanceController::class, 'indexPdf']);
